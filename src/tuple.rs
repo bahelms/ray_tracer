@@ -2,10 +2,10 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 
 const EPSILON: f64 = 0.00001;
 
-#[derive(Clone, PartialEq, Debug)]
-struct Tuple {
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub struct Tuple {
     x: f64,
-    y: f64,
+    pub y: f64,
     z: f64,
     w: f64,
 }
@@ -15,11 +15,11 @@ impl Tuple {
         Self { x, y, z, w }
     }
 
-    fn new_vector(x: f64, y: f64, z: f64) -> Self {
+    pub fn new_vector(x: f64, y: f64, z: f64) -> Self {
         Self::new(x, y, z, 0.0)
     }
 
-    fn new_point(x: f64, y: f64, z: f64) -> Self {
+    pub fn new_point(x: f64, y: f64, z: f64) -> Self {
         Self::new(x, y, z, 1.0)
     }
 
@@ -38,7 +38,7 @@ impl Tuple {
 
     /// Converting an arbitrary vector into a unit vector.
     /// A unit vector is a vector with magnitude 1.
-    fn normalize(&self) -> Self {
+    pub fn normalize(&self) -> Self {
         let magnitude = self.magnitude();
         Self::new(
             self.x / magnitude,
