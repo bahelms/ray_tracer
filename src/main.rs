@@ -1,16 +1,16 @@
 mod tuple;
 
 fn virtual_cannon() {
-    use tuple::Tuple;
+    use tuple::{Point, Vector};
 
     struct Projectile {
-        position: Tuple,
-        velocity: Tuple,
+        position: Point,
+        velocity: Vector,
     }
 
     struct Environment {
-        gravity: Tuple,
-        wind: Tuple,
+        gravity: Vector,
+        wind: Vector,
     }
 
     fn tick(env: &Environment, projectile: Projectile) -> Projectile {
@@ -20,13 +20,13 @@ fn virtual_cannon() {
     }
 
     let mut projectile = Projectile {
-        position: Tuple::new_point(0.0, 1.0, 0.0),
-        velocity: Tuple::new_vector(1.0, 1.0, 0.0).normalize(),
+        position: Point::new(0.0, 1.0, 0.0),
+        velocity: Vector::new(1.0, 1.0, 0.0).normalize(),
     };
 
     let env = Environment {
-        gravity: Tuple::new_vector(0.0, -0.1, 0.0),
-        wind: Tuple::new_vector(-0.01, 0.0, 0.0),
+        gravity: Vector::new(0.0, -0.1, 0.0),
+        wind: Vector::new(-0.01, 0.0, 0.0),
     };
 
     let mut tick_count = 0;
