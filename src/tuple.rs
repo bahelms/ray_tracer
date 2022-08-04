@@ -62,11 +62,11 @@ impl Vector {
     }
 }
 
-trait TupleTrait<T> {
+trait Tuple<T> {
     fn is_equal(&self, other: &T) -> bool;
 }
 
-impl TupleTrait<Point> for Vector {
+impl Tuple<Point> for Vector {
     fn is_equal(&self, other: &Point) -> bool {
         is_float_equal(self.x, other.x)
             && is_float_equal(self.y, other.y)
@@ -75,7 +75,7 @@ impl TupleTrait<Point> for Vector {
     }
 }
 
-impl TupleTrait<Self> for Vector {
+impl Tuple<Self> for Vector {
     fn is_equal(&self, other: &Self) -> bool {
         is_float_equal(self.x, other.x)
             && is_float_equal(self.y, other.y)
