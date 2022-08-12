@@ -369,14 +369,14 @@ mod tests {
     fn two_unequal_vectors() {
         let vec1 = Vector::new(4.9, -4.1, 3.0);
         let vec2 = Vector::new(4.9, -4.1, 3.1);
-        assert_eq!(vec1.is_equal(&vec2), false);
+        assert!(!vec1.is_equal(&vec2));
     }
 
     #[test]
     fn points_and_vectors_are_not_equal() {
         let vector = Vector::new(4.9, -4.1, 3.0);
         let point = Point::new(4.9, -4.1, 3.0);
-        assert_eq!(vector.is_equal(&point), false);
+        assert!(!vector.is_equal(&point));
     }
 
     #[test]
