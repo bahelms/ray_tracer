@@ -62,6 +62,19 @@ impl Vector {
     }
 }
 
+#[derive(Debug, PartialEq)]
+struct Color {
+    red: f64,
+    green: f64,
+    blue: f64,
+}
+
+impl Color {
+    fn new(red: f64, green: f64, blue: f64) -> Self {
+        Self { red, green, blue }
+    }
+}
+
 trait Tuple<T> {
     fn is_equal(&self, other: &T) -> bool;
 }
@@ -81,6 +94,14 @@ impl Tuple<Self> for Vector {
             && is_float_equal(self.y, other.y)
             && is_float_equal(self.z, other.z)
             && is_float_equal(self.w, other.w)
+    }
+}
+
+impl Tuple<Self> for Color {
+    fn is_equal(&self, other: &Self) -> bool {
+        is_float_equal(self.red, other.red)
+            && is_float_equal(self.green, other.green)
+            && is_float_equal(self.blue, other.blue)
     }
 }
 
@@ -129,6 +150,18 @@ impl Add<Vector> for Point {
     }
 }
 
+impl Add<Self> for Color {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self::Output {
+        Self::Output {
+            red: self.red + other.red,
+            green: self.green + other.green,
+            blue: self.blue + other.blue,
+        }
+    }
+}
+
 impl Sub<Self> for Point {
     type Output = Vector;
 
@@ -164,6 +197,18 @@ impl Sub<Self> for Vector {
             y: self.y - other.y,
             z: self.z - other.z,
             w: self.w - other.w,
+        }
+    }
+}
+
+impl Sub<Self> for Color {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self::Output {
+        Self::Output {
+            red: self.red - other.red,
+            green: self.green - other.green,
+            blue: self.blue - other.blue,
         }
     }
 }
@@ -207,6 +252,30 @@ impl Mul<f64> for Point {
     }
 }
 
+impl Mul<i32> for Color {
+    type Output = Self;
+
+    fn mul(self, scalar: i32) -> Self::Output {
+        Self {
+            red: self.red * scalar as f64,
+            green: self.green * scalar as f64,
+            blue: self.blue * scalar as f64,
+        }
+    }
+}
+
+impl Mul<Self> for Color {
+    type Output = Self;
+
+    fn mul(self, other: Color) -> Self::Output {
+        Self {
+            red: self.red * other.red,
+            green: self.green * other.green,
+            blue: self.blue * other.blue,
+        }
+    }
+}
+
 impl Div<f64> for Vector {
     type Output = Self;
 
@@ -236,6 +305,41 @@ impl Div<f64> for Point {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn multiplying_colors() {
+        let c1 = Color::new(1.0, 0.2, 0.4);
+        let c2 = Color::new(0.9, 1.0, 0.1);
+        assert!(Color::new(0.9, 0.2, 0.04).is_equal(&(c1 * c2)));
+    }
+
+    #[test]
+    fn multiplying_colors_by_scalar() {
+        let c1 = Color::new(0.2, 0.3, 0.4);
+        assert!(Color::new(0.4, 0.6, 0.8).is_equal(&(c1 * 2)));
+    }
+
+    #[test]
+    fn subtracting_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert!(Color::new(0.2, 0.5, 0.5).is_equal(&(c1 - c2)));
+    }
+
+    #[test]
+    fn adding_colors() {
+        let c1 = Color::new(0.9, 0.6, 0.75);
+        let c2 = Color::new(0.7, 0.1, 0.25);
+        assert_eq!(c1 + c2, Color::new(1.6, 0.7, 1.0));
+    }
+
+    #[test]
+    fn colors_are_tuples() {
+        let color = Color::new(-0.5, 0.4, 1.7);
+        assert_eq!(color.red, -0.5);
+        assert_eq!(color.green, 0.4);
+        assert_eq!(color.blue, 1.7);
+    }
 
     #[test]
     fn cross_product_of_two_vectors_returns_a_vector() {
