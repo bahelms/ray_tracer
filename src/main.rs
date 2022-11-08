@@ -1,3 +1,4 @@
+mod canvas;
 mod tuple;
 
 fn virtual_cannon() {

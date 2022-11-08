@@ -63,14 +63,14 @@ impl Vector {
 }
 
 #[derive(Debug, PartialEq)]
-struct Color {
+pub struct Color {
     red: f64,
     green: f64,
     blue: f64,
 }
 
 impl Color {
-    fn new(red: f64, green: f64, blue: f64) -> Self {
+    pub fn new(red: f64, green: f64, blue: f64) -> Self {
         Self { red, green, blue }
     }
 }
@@ -334,7 +334,7 @@ mod tests {
     }
 
     #[test]
-    fn colors_are_tuples() {
+    fn color_new() {
         let color = Color::new(-0.5, 0.4, 1.7);
         assert_eq!(color.red, -0.5);
         assert_eq!(color.green, 0.4);
