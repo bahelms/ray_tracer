@@ -23,12 +23,14 @@ impl Canvas {
 
     pub fn write_pixel(&mut self, x: i32, y: i32, color: Color) {
         let idx = self.point_to_index(x, y);
-        self.pixels[idx] = color;
+        if idx < self.pixels.len() {
+            self.pixels[idx] = color;
+        }
     }
 
-    fn pixel_at(&self, x: i32, y: i32) -> &Color {
+    fn pixel_at(&self, x: i32, y: i32) -> Option<&Color> {
         let idx = self.point_to_index(x, y);
-        &self.pixels[idx]
+        self.pixels.get(idx)
     }
 
     fn point_to_index(&self, x: i32, y: i32) -> usize {
@@ -140,10 +142,17 @@ mod tests {
     }
 
     #[test]
+    fn writing_a_pixel_out_of_bounds_of_canvas() {
+        let mut canvas = Canvas::new(5, 10);
+        canvas.write_pixel(5, 9, Color::new(1.0, 0.0, 0.0));
+        assert_eq!(canvas.pixel_at(1, 10), None);
+    }
+
+    #[test]
     fn writing_and_getting_a_pixel_on_the_canvas() {
         let mut canvas = Canvas::new(5, 10);
         canvas.write_pixel(2, 3, Color::new(1.0, 0.0, 0.0));
-        assert_eq!(*canvas.pixel_at(2, 3), Color::new(1.0, 0.0, 0.0));
+        assert_eq!(canvas.pixel_at(2, 3).unwrap(), &Color::new(1.0, 0.0, 0.0));
     }
 
     #[test]
