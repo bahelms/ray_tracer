@@ -1,8 +1,11 @@
 mod canvas;
 mod tuple;
 
+use std::fs::File;
+use std::io::prelude::*;
+
 fn virtual_cannon() {
-    use tuple::{Point, Vector};
+    use tuple::{Color, Point, Vector};
 
     struct Projectile {
         position: Point,
@@ -22,7 +25,7 @@ fn virtual_cannon() {
 
     let mut projectile = Projectile {
         position: Point::new(0.0, 1.0, 0.0),
-        velocity: Vector::new(1.0, 1.0, 0.0).normalize(),
+        velocity: Vector::new(1.0, 1.8, 0.0).normalize() * 5.85,
     };
 
     let env = Environment {
@@ -30,13 +33,21 @@ fn virtual_cannon() {
         wind: Vector::new(-0.01, 0.0, 0.0),
     };
 
-    let mut tick_count = 0;
+    let mut canvas = canvas::Canvas::new(300, 150);
+
     while projectile.position.y > 0.0 {
         projectile = tick(&env, projectile);
-        tick_count += 1;
-        println!("{:?}", projectile.position);
+        let pos = projectile.position;
+        let color = Color::new(1.0, 0.0, 0.0);
+        let pos_y = canvas.height - (pos.y as i32);
+        if pos_y <= canvas.height {
+            canvas.write_pixel(pos.x as i32, pos_y, color);
+        }
     }
-    println!("Total ticks: {:?}", tick_count);
+
+    let ppm = canvas.to_ppm();
+    let mut file = File::create("cannon.ppm").unwrap();
+    file.write_all(ppm.as_bytes()).unwrap();
 }
 
 fn main() {
