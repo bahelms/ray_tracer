@@ -25,7 +25,7 @@ fn virtual_cannon() {
 
     let mut projectile = Projectile {
         position: Point::new(0.0, 1.0, 0.0),
-        velocity: Vector::new(1.0, 1.8, 0.0).normalize() * 5.85,
+        velocity: Vector::new(1.0, 1.8, 0.0).normalize() * 7.85,
     };
 
     let env = Environment {
@@ -33,12 +33,13 @@ fn virtual_cannon() {
         wind: Vector::new(-0.01, 0.0, 0.0),
     };
 
-    let mut canvas = canvas::Canvas::new(300, 150);
+    // cargo run  7.40s user 4.33s system 99% cpu 11.822 total
+    let mut canvas = canvas::Canvas::new(500, 300);
 
     while projectile.position.y > 0.0 {
         projectile = tick(&env, projectile);
         let pos = projectile.position;
-        let color = Color::new(1.0, 0.0, 0.0);
+        let color = Color::new(1.0, 0.0, 1.0);
         let pos_y = canvas.height - (pos.y as i32);
         if pos_y <= canvas.height {
             canvas.write_pixel(pos.x as i32, pos_y, color);
