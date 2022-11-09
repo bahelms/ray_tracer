@@ -33,7 +33,6 @@ fn virtual_cannon() {
         wind: Vector::new(-0.01, 0.0, 0.0),
     };
 
-    // cargo run  7.40s user 4.33s system 99% cpu 11.822 total
     let mut canvas = canvas::Canvas::new(500, 300);
 
     while projectile.position.y > 0.0 {

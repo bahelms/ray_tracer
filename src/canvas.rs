@@ -38,6 +38,8 @@ impl Canvas {
     }
 
     // Color values are scaled bewteen 0 and 255: 0:0-1:255
+    // This algorithm runs pretty slow.
+    // At 500x300 canvas: "cargo run  7.40s user 4.33s system 99% cpu 11.822 total"
     pub fn to_ppm(&self) -> String {
         const MAX_VALUE: i32 = 255;
         let mut ppm = format!("P3\n{} {}\n{}\n", self.width, self.height, MAX_VALUE);
