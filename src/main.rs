@@ -18,9 +18,10 @@ fn virtual_cannon() {
     }
 
     fn tick(env: &Environment, projectile: Projectile) -> Projectile {
-        let position = projectile.position + projectile.velocity;
-        let velocity = projectile.velocity + env.gravity + env.wind;
-        Projectile { position, velocity }
+        Projectile {
+            position: projectile.position + projectile.velocity,
+            velocity: projectile.velocity + env.gravity + env.wind,
+        }
     }
 
     let mut projectile = Projectile {
@@ -38,16 +39,15 @@ fn virtual_cannon() {
     while projectile.position.y > 0.0 {
         projectile = tick(&env, projectile);
         let pos = projectile.position;
-        let color = Color::new(1.0, 0.0, 1.0);
         let pos_y = canvas.height - (pos.y as i32);
         if pos_y <= canvas.height {
+            let color = Color::new(1.0, 0.0, 1.0);
             canvas.write_pixel(pos.x as i32, pos_y, color);
         }
     }
 
-    let ppm = canvas.to_ppm();
     let mut file = File::create("images/cannon.ppm").unwrap();
-    file.write_all(ppm.as_bytes()).unwrap();
+    file.write_all(canvas.to_ppm().as_bytes()).unwrap();
 }
 
 fn main() {

@@ -1,5 +1,8 @@
 use crate::tuple::Color;
 
+const MAX_PPM_VALUE: i32 = 255;
+const PPM_LINE_SIZE: i32 = 70;
+
 pub struct Canvas {
     width: i32,
     pub height: i32,
@@ -11,7 +14,7 @@ impl Canvas {
         let capacity = width * height;
         let mut pixels = Vec::with_capacity(capacity as usize);
         for _ in 0..capacity {
-            pixels.push(Color::new(0.0, 0.0, 0.0));
+            pixels.push(Color::black());
         }
 
         Self {
@@ -21,10 +24,10 @@ impl Canvas {
         }
     }
 
-    pub fn write_pixel(&mut self, x: i32, y: i32, color: Color) {
+    pub fn write_pixel(&mut self, x: i32, y: i32, pixel: Color) {
         let idx = self.point_to_index(x, y);
         if idx < self.pixels.len() {
-            self.pixels[idx] = color;
+            self.pixels[idx] = pixel;
         }
     }
 
@@ -41,21 +44,19 @@ impl Canvas {
     // This algorithm runs pretty slow.
     // At 500x300 canvas: "cargo run  7.40s user 4.33s system 99% cpu 11.822 total"
     pub fn to_ppm(&self) -> String {
-        const MAX_VALUE: i32 = 255;
-        let mut ppm = format!("P3\n{} {}\n{}\n", self.width, self.height, MAX_VALUE);
+        let mut ppm = format!("P3\n{} {}\n{}\n", self.width, self.height, MAX_PPM_VALUE);
         let scaled_pixels: Vec<[i32; 3]> = self
             .pixels
             .iter()
-            .map(|color| scale_color(color, MAX_VALUE))
+            .map(|color| scale_color(color, MAX_PPM_VALUE))
             .collect();
 
-        const LINE_SIZE: i32 = 70;
         for chunk in scaled_pixels.chunks(self.width as usize) {
             let mut char_count = 0;
             let color_values = chunk.iter().flatten().map(|values| values.to_string());
             for value in color_values {
                 let next_char_count = char_count + value.len() as i32 + 1; // for the space
-                if next_char_count > LINE_SIZE {
+                if next_char_count > PPM_LINE_SIZE {
                     ppm.pop();
                     ppm = format!("{}\n{} ", ppm, value);
                     char_count = 0;
@@ -72,15 +73,10 @@ impl Canvas {
 }
 
 fn scale_color(color: &Color, max: i32) -> [i32; 3] {
-    let total_values = max + 1; // include 0 (0..=max is max+1 values)
+    let total_values = (max + 1) as f64; // include 0 (0..=max is max+1 values)
     [color.red, color.green, color.blue].map(|value| {
-        let mut scaled = (value * total_values as f64) as i32;
-        if scaled < 0 {
-            scaled = 0;
-        } else if scaled > max {
-            scaled = max;
-        }
-        scaled
+        let scaled = (value * total_values) as i32;
+        scaled.clamp(0, max)
     })
 }
 
@@ -88,6 +84,12 @@ fn scale_color(color: &Color, max: i32) -> [i32; 3] {
 mod tests {
     use super::*;
     use crate::tuple::Color;
+
+    #[test]
+    fn scale_pink_color() {
+        let result = scale_color(&Color::new(0.5, 0.0, 0.0), 255);
+        assert_eq!(result, [128, 0, 0]);
+    }
 
     #[test]
     fn scale_color_clamps_values_bewteen_zero_and_max() {

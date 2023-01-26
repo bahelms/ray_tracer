@@ -73,6 +73,14 @@ impl Color {
     pub fn new(red: f64, green: f64, blue: f64) -> Self {
         Self { red, green, blue }
     }
+
+    pub fn black() -> Self {
+        Self::new(0.0, 0.0, 0.0)
+    }
+
+    pub fn white() -> Self {
+        Self::new(1.0, 1.0, 1.0)
+    }
 }
 
 trait Tuple<T> {
@@ -124,24 +132,11 @@ impl Add<Point> for Vector {
     }
 }
 
-impl Add<Self> for Vector {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self::Output {
-        Self::Output {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-            w: self.w + other.w,
-        }
-    }
-}
-
 impl Add<Vector> for Point {
     type Output = Self;
 
-    fn add(self, other: Vector) -> Self::Output {
-        Self::Output {
+    fn add(self, other: Vector) -> Self {
+        Self {
             x: self.x + other.x,
             y: self.y + other.y,
             z: self.z + other.z,
@@ -150,11 +145,24 @@ impl Add<Vector> for Point {
     }
 }
 
-impl Add<Self> for Color {
+impl Add for Vector {
     type Output = Self;
 
-    fn add(self, other: Self) -> Self::Output {
-        Self::Output {
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            w: self.w + other.w,
+        }
+    }
+}
+
+impl Add for Color {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
             red: self.red + other.red,
             green: self.green + other.green,
             blue: self.blue + other.blue,
@@ -162,7 +170,7 @@ impl Add<Self> for Color {
     }
 }
 
-impl Sub<Self> for Point {
+impl Sub for Point {
     type Output = Vector;
 
     fn sub(self, other: Self) -> Self::Output {
@@ -188,11 +196,11 @@ impl Sub<Vector> for Point {
     }
 }
 
-impl Sub<Self> for Vector {
+impl Sub for Vector {
     type Output = Self;
 
-    fn sub(self, other: Self) -> Self::Output {
-        Self::Output {
+    fn sub(self, other: Self) -> Self {
+        Self {
             x: self.x - other.x,
             y: self.y - other.y,
             z: self.z - other.z,
@@ -201,11 +209,11 @@ impl Sub<Self> for Vector {
     }
 }
 
-impl Sub<Self> for Color {
+impl Sub for Color {
     type Output = Self;
 
-    fn sub(self, other: Self) -> Self::Output {
-        Self::Output {
+    fn sub(self, other: Self) -> Self {
+        Self {
             red: self.red - other.red,
             green: self.green - other.green,
             blue: self.blue - other.blue,
@@ -264,10 +272,10 @@ impl Mul<i32> for Color {
     }
 }
 
-impl Mul<Self> for Color {
+impl Mul for Color {
     type Output = Self;
 
-    fn mul(self, other: Color) -> Self::Output {
+    fn mul(self, other: Color) -> Self {
         Self {
             red: self.red * other.red,
             green: self.green * other.green,
@@ -305,6 +313,18 @@ impl Div<f64> for Point {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn creating_new_black_color() {
+        let black = Color::new(0.0, 0.0, 0.0);
+        assert_eq!(black, Color::black());
+    }
+
+    #[test]
+    fn creating_new_white_color() {
+        let white = Color::new(1.0, 1.0, 1.0);
+        assert_eq!(white, Color::white());
+    }
 
     #[test]
     fn multiplying_colors() {
