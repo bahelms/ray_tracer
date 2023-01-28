@@ -1,3 +1,4 @@
+use crate::is_float_equal;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -111,12 +112,6 @@ impl Tuple<Self> for Color {
             && is_float_equal(self.green, other.green)
             && is_float_equal(self.blue, other.blue)
     }
-}
-
-const EPSILON: f64 = 0.00001;
-
-fn is_float_equal(a: f64, b: f64) -> bool {
-    (a - b).abs() < EPSILON
 }
 
 impl Add<Point> for Vector {
