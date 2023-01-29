@@ -5,8 +5,8 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 pub struct Point {
     pub x: f64,
     pub y: f64,
-    z: f64,
-    w: f64,
+    pub z: f64,
+    pub w: f64,
 }
 
 impl Point {
@@ -84,7 +84,7 @@ impl Color {
     }
 }
 
-trait Tuple<T> {
+pub trait Tuple<T> {
     fn is_equal(&self, other: &T) -> bool;
 }
 
