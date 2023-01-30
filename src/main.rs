@@ -43,6 +43,7 @@ fn virtual_cannon() {
         }
     }
 
+    println!("Writing PPM image file...");
     let mut file = File::create("images/cannon.ppm").unwrap();
     file.write_all(canvas.to_ppm().as_bytes()).unwrap();
 }

@@ -82,6 +82,33 @@ impl Color {
     pub fn white() -> Self {
         Self::new(1.0, 1.0, 1.0)
     }
+
+    pub fn iter(&self) -> ColorIter {
+        ColorIter {
+            current: 0,
+            color: self,
+        }
+    }
+}
+
+pub struct ColorIter<'a> {
+    current: i32,
+    color: &'a Color,
+}
+
+impl<'a> Iterator for ColorIter<'a> {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = match self.current {
+            0 => Some(self.color.red),
+            1 => Some(self.color.green),
+            2 => Some(self.color.blue),
+            _ => None,
+        };
+        self.current += 1;
+        value
+    }
 }
 
 pub trait Tuple<T> {
@@ -308,6 +335,16 @@ impl Div<f64> for Point {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn color_is_iterable() {
+        let color = Color::new(1.0, 0.1, 0.4);
+        let mut iter = color.iter();
+        assert_eq!(iter.next(), Some(1.0));
+        assert_eq!(iter.next(), Some(0.1));
+        assert_eq!(iter.next(), Some(0.4));
+        assert_eq!(iter.next(), None);
+    }
 
     #[test]
     fn creating_new_black_color() {

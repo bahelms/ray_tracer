@@ -45,39 +45,33 @@ impl Canvas {
     // At 500x300 canvas: "cargo run  7.40s user 4.33s system 99% cpu 11.822 total"
     pub fn to_ppm(&self) -> String {
         let mut ppm = format!("P3\n{} {}\n{}\n", self.width, self.height, MAX_PPM_VALUE);
-        let scaled_pixels: Vec<[i32; 3]> = self
-            .pixels
-            .iter()
-            .map(|color| scale_color(color, MAX_PPM_VALUE))
-            .collect();
 
-        for chunk in scaled_pixels.chunks(self.width as usize) {
-            let mut char_count = 0;
-            let color_values = chunk.iter().flatten().map(|values| values.to_string());
-            for value in color_values {
-                let next_char_count = char_count + value.len() as i32 + 1; // for the space
+        let mut char_count = 0;
+        for pixel in &self.pixels {
+            for value in pixel.iter() {
+                let value = scale_value(value, MAX_PPM_VALUE).to_string();
+                let value_length = value.len() as i32;
+                let next_char_count = char_count + value_length + 1; // for the space
                 if next_char_count > PPM_LINE_SIZE {
-                    ppm.pop();
+                    ppm.pop(); // remove previous space
                     ppm = format!("{}\n{} ", ppm, value);
-                    char_count = 0;
+                    char_count = value_length;
                 } else {
                     ppm = format!("{}{} ", ppm, value);
                     char_count = next_char_count;
                 }
             }
-            ppm.pop();
-            ppm.push('\n');
         }
+        ppm.pop();
+        ppm.push('\n');
         ppm
     }
 }
 
-fn scale_color(color: &Color, max: i32) -> [i32; 3] {
+fn scale_value(value: f64, max: i32) -> i32 {
     let total_values = (max + 1) as f64; // include 0 (0..=max is max+1 values)
-    [color.red, color.green, color.blue].map(|value| {
-        let scaled = (value * total_values) as i32;
-        scaled.clamp(0, max)
-    })
+    let scaled = (value * total_values) as i32;
+    scaled.clamp(0, max)
 }
 
 #[cfg(test)]
@@ -86,18 +80,13 @@ mod tests {
     use crate::tuple::Color;
 
     #[test]
-    fn scale_pink_color() {
-        let result = scale_color(&Color::new(0.5, 0.0, 0.0), 255);
-        assert_eq!(result, [128, 0, 0]);
-    }
-
-    #[test]
-    fn scale_color_clamps_values_bewteen_zero_and_max() {
-        let result = scale_color(&Color::new(1.5, 0.5, -0.1), 255);
-        assert_eq!(result, [255, 128, 0]);
-
-        let result = scale_color(&Color::new(0.9, 0.1, 0.4), 255);
-        assert_eq!(result, [230, 25, 102]);
+    fn scale_value_clamps_values_bewteen_zero_and_max() {
+        assert_eq!(scale_value(0.5, 255), 128);
+        assert_eq!(scale_value(1.5, 255), 255);
+        assert_eq!(scale_value(-0.1, 255), 0);
+        assert_eq!(scale_value(0.9, 255), 230);
+        assert_eq!(scale_value(0.1, 255), 25);
+        assert_eq!(scale_value(0.4, 255), 102);
     }
 
     #[test]
@@ -113,9 +102,9 @@ mod tests {
             10 2\n\
             255\n\
             255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n\
-            153 255 204 153 255 204 153 255 204 153 255 204 153\n\
-            255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204\n\
-            153 255 204 153 255 204 153 255 204 153 255 204 153\n\
+            153 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153 255\n\
+            204 153 255 204 153 255 204 153 255 204 153 255 204 153 255 204 153\n\
+            255 204 153 255 204 153 255 204 153\n\
             ";
         assert_eq!(ppm, expected_ppm);
     }
@@ -130,9 +119,8 @@ mod tests {
         let expected_ppm = "P3\n\
             5 3\n\
             255\n\
-            255 0 0 0 0 0 0 0 0 0 0 0 0 0 0\n\
-            0 0 0 0 0 0 0 128 0 0 0 0 0 0 0\n\
-            0 0 0 0 0 0 0 0 0 0 0 0 0 0 255\n\
+            255 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 128 0 0 0 0 0 0 0 0 0 0\n\
+            0 0 0 0 0 0 0 0 0 0 0 255\n\
             ";
         assert_eq!(ppm, expected_ppm);
     }
