@@ -24,6 +24,27 @@ impl Matrix {
     fn populate(rows: Vec<Vec<f64>>) -> Self {
         Self { rows }
     }
+
+    // hardcoded for 4x4
+    fn identity() -> Self {
+        Self::populate(vec![
+            vec![1.0, 0.0, 0.0, 0.0],
+            vec![0.0, 1.0, 0.0, 0.0],
+            vec![0.0, 0.0, 1.0, 0.0],
+            vec![0.0, 0.0, 0.0, 1.0],
+        ])
+    }
+
+    // changes the rows into columns
+    fn transpose(&self) -> Self {
+        let mut transposed = self.clone();
+        for (col, row) in self.rows.iter().enumerate() {
+            for (idx, value) in row.iter().enumerate() {
+                transposed[idx][col] = *value;
+            }
+        }
+        transposed
+    }
 }
 
 impl Index<usize> for Matrix {
@@ -92,7 +113,48 @@ mod tests {
     use super::*;
 
     #[test]
-    fn multiplying_a_matrix_with_a_tuple_returns_tuple() {
+    fn transposing_a_the_identity_matrix_returns_the_identity() {
+        assert_eq!(Matrix::identity().transpose(), Matrix::identity());
+    }
+
+    #[test]
+    fn transposing_a_matrix_turns_the_rows_into_columns() {
+        let matrix = Matrix::populate(vec![
+            vec![0.0, 9.0, 3.0, 0.0],
+            vec![9.0, 8.0, 0.0, 8.0],
+            vec![1.0, 8.0, 5.0, 3.0],
+            vec![0.0, 0.0, 5.0, 8.0],
+        ]);
+        let transposed = Matrix::populate(vec![
+            vec![0.0, 9.0, 1.0, 0.0],
+            vec![9.0, 8.0, 8.0, 0.0],
+            vec![3.0, 0.0, 5.0, 5.0],
+            vec![0.0, 8.0, 3.0, 8.0],
+        ]);
+        assert_eq!(matrix.transpose(), transposed);
+    }
+
+    #[test]
+    fn multiplying_identity_matrix_with_point_returns_point() {
+        let tuple = Point::new(1.0, 2.0, 3.0);
+        let identity = Matrix::identity();
+        assert_eq!(identity * tuple, tuple);
+    }
+
+    #[test]
+    fn multiplying_matrix_with_identity_matrix_returns_matrix() {
+        let matrix1 = Matrix::populate(vec![
+            vec![1.0, 2.0, 3.0, 4.0],
+            vec![5.0, 6.0, 7.0, 8.0],
+            vec![9.0, 8.0, 7.0, 6.0],
+            vec![5.0, 4.0, 3.0, 2.0],
+        ]);
+        let identity = Matrix::identity();
+        assert_eq!(matrix1.clone() * identity, matrix1);
+    }
+
+    #[test]
+    fn multiplying_a_matrix_with_a_point_returns_point() {
         let matrix = Matrix::populate(vec![
             vec![1.0, 2.0, 3.0, 4.0],
             vec![2.0, 4.0, 4.0, 2.0],

@@ -47,8 +47,8 @@ impl Canvas {
         let mut ppm = format!("P3\n{} {}\n{}\n", self.width, self.height, MAX_PPM_VALUE);
 
         let mut char_count = 0;
-        for pixel in &self.pixels {
-            for value in pixel.iter() {
+        for color in &self.pixels {
+            for value in color.iter() {
                 let value = scale_value(value, MAX_PPM_VALUE).to_string();
                 let value_length = value.len() as i32;
                 let next_char_count = char_count + value_length + 1; // for the space
