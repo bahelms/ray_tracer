@@ -1,4 +1,4 @@
-use crate::tuple::{Point, Vector};
+use crate::tuple::Tuple;
 use std::ops::{Index, IndexMut, Mul};
 
 /*
@@ -163,11 +163,11 @@ impl Mul for &Matrix {
     }
 }
 
-impl Mul<Point> for Matrix {
-    type Output = Point;
+impl Mul<Tuple> for Matrix {
+    type Output = Tuple;
 
     // Hardcoded for a 4x4 matrix
-    fn mul(self, other: Point) -> Self::Output {
+    fn mul(self, other: Tuple) -> Self::Output {
         let x = self[0][0] * other.x
             + self[0][1] * other.y
             + self[0][2] * other.z
@@ -184,36 +184,9 @@ impl Mul<Point> for Matrix {
             + self[3][1] * other.y
             + self[3][2] * other.z
             + self[3][3] * other.w;
-        let mut point = Point::new(x, y, z);
+        let mut point = Tuple::point(x, y, z);
         point.w = w;
         point
-    }
-}
-
-impl Mul<Vector> for Matrix {
-    type Output = Vector;
-
-    // Hardcoded for a 4x4 matrix
-    fn mul(self, other: Vector) -> Self::Output {
-        let x = self[0][0] * other.x
-            + self[0][1] * other.y
-            + self[0][2] * other.z
-            + self[0][3] * other.w;
-        let y = self[1][0] * other.x
-            + self[1][1] * other.y
-            + self[1][2] * other.z
-            + self[1][3] * other.w;
-        let z = self[2][0] * other.x
-            + self[2][1] * other.y
-            + self[2][2] * other.z
-            + self[2][3] * other.w;
-        let w = self[3][0] * other.x
-            + self[3][1] * other.y
-            + self[3][2] * other.z
-            + self[3][3] * other.w;
-        let mut vector = Vector::new(x, y, z);
-        vector.w = w;
-        vector
     }
 }
 
@@ -232,23 +205,23 @@ mod tests {
 
     #[test]
     fn multiply_translation_matrix_with_a_vector_does_not_change_vector() {
-        let vector = Vector::new(-3.0, 4.0, 5.0);
+        let vector = Tuple::vector(-3.0, 4.0, 5.0);
         assert_eq!(translation(5.0, -3.0, 2.0) * vector, vector);
     }
 
     #[test]
     fn multiply_translation_matrix_inverse_with_a_point() {
         assert_eq!(
-            translation(5.0, -3.0, 2.0).inverse().unwrap() * Point::new(-3.0, 4.0, 5.0),
-            Point::new(-8.0, 7.0, 3.0)
+            translation(5.0, -3.0, 2.0).inverse().unwrap() * Tuple::point(-3.0, 4.0, 5.0),
+            Tuple::point(-8.0, 7.0, 3.0)
         );
     }
 
     #[test]
     fn multiply_translation_matrix_with_a_point() {
         assert_eq!(
-            translation(5.0, -3.0, 2.0) * Point::new(-3.0, 4.0, 5.0),
-            Point::new(2.0, 1.0, 7.0)
+            translation(5.0, -3.0, 2.0) * Tuple::point(-3.0, 4.0, 5.0),
+            Tuple::point(2.0, 1.0, 7.0)
         );
     }
 
@@ -523,7 +496,7 @@ mod tests {
 
     #[test]
     fn multiplying_identity_matrix_with_point_returns_point() {
-        let tuple = Point::new(1.0, 2.0, 3.0);
+        let tuple = Tuple::point(1.0, 2.0, 3.0);
         let identity = Matrix::identity();
         assert_eq!(identity * tuple, tuple);
     }
@@ -548,8 +521,8 @@ mod tests {
             vec![8.0, 6.0, 4.0, 1.0],
             vec![0.0, 0.0, 0.0, 1.0],
         ]);
-        let tuple = Point::new(1.0, 2.0, 3.0);
-        assert_eq!(matrix * tuple, Point::new(18.0, 24.0, 33.0));
+        let tuple = Tuple::point(1.0, 2.0, 3.0);
+        assert_eq!(matrix * tuple, Tuple::point(18.0, 24.0, 33.0));
     }
 
     #[test]

@@ -1,17 +1,17 @@
 use ray_tracer::canvas::Canvas;
-use ray_tracer::tuple::{Color, Point, Vector};
+use ray_tracer::tuple::{Color, Tuple};
 use std::fs::File;
 use std::io::prelude::*;
 
 fn virtual_cannon() {
     struct Projectile {
-        position: Point,
-        velocity: Vector,
+        position: Tuple,
+        velocity: Tuple,
     }
 
     struct Environment {
-        gravity: Vector,
-        wind: Vector,
+        gravity: Tuple,
+        wind: Tuple,
     }
 
     fn tick(env: &Environment, projectile: Projectile) -> Projectile {
@@ -22,13 +22,13 @@ fn virtual_cannon() {
     }
 
     let mut projectile = Projectile {
-        position: Point::new(0.0, 1.0, 0.0),
-        velocity: Vector::new(1.0, 1.8, 0.0).normalize() * 7.85,
+        position: Tuple::point(0.0, 1.0, 0.0),
+        velocity: Tuple::vector(1.0, 1.8, 0.0).normalize() * 7.85,
     };
 
     let env = Environment {
-        gravity: Vector::new(0.0, -0.1, 0.0),
-        wind: Vector::new(-0.01, 0.0, 0.0),
+        gravity: Tuple::vector(0.0, -0.1, 0.0),
+        wind: Tuple::vector(-0.01, 0.0, 0.0),
     };
 
     let mut canvas = Canvas::new(500, 300);
