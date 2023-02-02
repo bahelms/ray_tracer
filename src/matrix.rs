@@ -1,4 +1,4 @@
-use crate::tuple::Point;
+use crate::tuple::{Point, Vector};
 use std::ops::{Index, IndexMut, Mul};
 
 /*
@@ -190,10 +190,67 @@ impl Mul<Point> for Matrix {
     }
 }
 
+impl Mul<Vector> for Matrix {
+    type Output = Vector;
+
+    // Hardcoded for a 4x4 matrix
+    fn mul(self, other: Vector) -> Self::Output {
+        let x = self[0][0] * other.x
+            + self[0][1] * other.y
+            + self[0][2] * other.z
+            + self[0][3] * other.w;
+        let y = self[1][0] * other.x
+            + self[1][1] * other.y
+            + self[1][2] * other.z
+            + self[1][3] * other.w;
+        let z = self[2][0] * other.x
+            + self[2][1] * other.y
+            + self[2][2] * other.z
+            + self[2][3] * other.w;
+        let w = self[3][0] * other.x
+            + self[3][1] * other.y
+            + self[3][2] * other.z
+            + self[3][3] * other.w;
+        let mut vector = Vector::new(x, y, z);
+        vector.w = w;
+        vector
+    }
+}
+
+fn translation(x: f64, y: f64, z: f64) -> Matrix {
+    let mut matrix = Matrix::identity();
+    matrix[0][3] = x;
+    matrix[1][3] = y;
+    matrix[2][3] = z;
+    matrix
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::is_float_equal;
+
+    #[test]
+    fn multiply_translation_matrix_with_a_vector_does_not_change_vector() {
+        let vector = Vector::new(-3.0, 4.0, 5.0);
+        assert_eq!(translation(5.0, -3.0, 2.0) * vector, vector);
+    }
+
+    #[test]
+    fn multiply_translation_matrix_inverse_with_a_point() {
+        assert_eq!(
+            translation(5.0, -3.0, 2.0).inverse().unwrap() * Point::new(-3.0, 4.0, 5.0),
+            Point::new(-8.0, 7.0, 3.0)
+        );
+    }
+
+    #[test]
+    fn multiply_translation_matrix_with_a_point() {
+        assert_eq!(
+            translation(5.0, -3.0, 2.0) * Point::new(-3.0, 4.0, 5.0),
+            Point::new(2.0, 1.0, 7.0)
+        );
+    }
 
     #[test]
     fn multiplying_a_product_matrix_by_the_inverse_of_an_operand_gets_other_operand() {
