@@ -43,12 +43,65 @@ fn rotation_z(radians: f64) -> Matrix {
     matrix
 }
 
+fn shearing(xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Matrix {
+    let mut matrix = Matrix::identity();
+    matrix[0][1] = xy;
+    matrix[0][2] = xz;
+    matrix[1][0] = yx;
+    matrix[1][2] = yz;
+    matrix[2][0] = zx;
+    matrix[2][1] = zy;
+    matrix
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::is_float_equal;
     use crate::tuple::Tuple;
     use std::f64::consts::PI;
+
+    #[test]
+    fn shearing_moves_z_in_proportion_to_y() {
+        let point = Tuple::point(2.0, 3.0, 4.0);
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        assert_eq!(transform * point, Tuple::point(2.0, 3.0, 7.0));
+    }
+
+    #[test]
+    fn shearing_moves_z_in_proportion_to_x() {
+        let point = Tuple::point(2.0, 3.0, 4.0);
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        assert_eq!(transform * point, Tuple::point(2.0, 3.0, 6.0));
+    }
+
+    #[test]
+    fn shearing_moves_y_in_proportion_to_z() {
+        let point = Tuple::point(2.0, 3.0, 4.0);
+        let transform = shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        assert_eq!(transform * point, Tuple::point(2.0, 7.0, 4.0));
+    }
+
+    #[test]
+    fn shearing_moves_y_in_proportion_to_x() {
+        let point = Tuple::point(2.0, 3.0, 4.0);
+        let transform = shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        assert_eq!(transform * point, Tuple::point(2.0, 5.0, 4.0));
+    }
+
+    #[test]
+    fn shearing_moves_x_in_proportion_to_z() {
+        let point = Tuple::point(2.0, 3.0, 4.0);
+        let transform = shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        assert_eq!(transform * point, Tuple::point(6.0, 3.0, 4.0));
+    }
+
+    #[test]
+    fn shearing_moves_x_in_proportion_to_y() {
+        let point = Tuple::point(2.0, 3.0, 4.0);
+        let transform = shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        assert_eq!(transform * point, Tuple::point(5.0, 3.0, 4.0));
+    }
 
     #[test]
     fn rotating_a_point_around_z_axis() {
