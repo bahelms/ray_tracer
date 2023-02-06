@@ -1,3 +1,5 @@
+mod transformations;
+
 use crate::tuple::Tuple;
 use std::ops::{Index, IndexMut, Mul};
 
@@ -190,82 +192,10 @@ impl Mul<Tuple> for Matrix {
     }
 }
 
-// Transformations
-
-fn translation(x: f64, y: f64, z: f64) -> Matrix {
-    let mut matrix = Matrix::identity();
-    matrix[0][3] = x;
-    matrix[1][3] = y;
-    matrix[2][3] = z;
-    matrix
-}
-
-fn scaling(x: f64, y: f64, z: f64) -> Matrix {
-    let mut matrix = Matrix::identity();
-    matrix[0][0] = x;
-    matrix[1][1] = y;
-    matrix[2][2] = z;
-    matrix
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::is_float_equal;
-
-    #[test]
-    fn scaling_with_a_negative_value_reflects_the_tuple() {
-        assert_eq!(
-            scaling(-1.0, 1.0, 1.0) * Tuple::point(2.0, 3.0, 4.0),
-            Tuple::point(-2.0, 3.0, 4.0)
-        );
-    }
-
-    #[test]
-    fn multiply_scaling_matrix_inverse_with_a_point() {
-        assert_eq!(
-            scaling(2.0, 3.0, 4.0).inverse().unwrap() * Tuple::vector(-4.0, 6.0, 8.0),
-            Tuple::vector(-2.0, 2.0, 2.0)
-        );
-    }
-
-    #[test]
-    fn multiply_scaling_matrix_with_a_vector() {
-        assert_eq!(
-            scaling(2.0, 3.0, 4.0) * Tuple::vector(-4.0, 6.0, 8.0),
-            Tuple::vector(-8.0, 18.0, 32.0)
-        );
-    }
-
-    #[test]
-    fn multiply_scaling_matrix_with_a_point() {
-        assert_eq!(
-            scaling(2.0, 3.0, 4.0) * Tuple::point(-4.0, 6.0, 8.0),
-            Tuple::point(-8.0, 18.0, 32.0)
-        );
-    }
-
-    #[test]
-    fn multiply_translation_matrix_with_a_vector_does_not_change_vector() {
-        let vector = Tuple::vector(-3.0, 4.0, 5.0);
-        assert_eq!(translation(5.0, -3.0, 2.0) * vector, vector);
-    }
-
-    #[test]
-    fn multiply_translation_matrix_inverse_with_a_point() {
-        assert_eq!(
-            translation(5.0, -3.0, 2.0).inverse().unwrap() * Tuple::point(-3.0, 4.0, 5.0),
-            Tuple::point(-8.0, 7.0, 3.0)
-        );
-    }
-
-    #[test]
-    fn multiply_translation_matrix_with_a_point() {
-        assert_eq!(
-            translation(5.0, -3.0, 2.0) * Tuple::point(-3.0, 4.0, 5.0),
-            Tuple::point(2.0, 1.0, 7.0)
-        );
-    }
 
     #[test]
     fn multiplying_a_product_matrix_by_the_inverse_of_an_operand_gets_other_operand() {
