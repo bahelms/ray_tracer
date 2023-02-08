@@ -62,6 +62,15 @@ mod tests {
     use std::f64::consts::PI;
 
     #[test]
+    fn chained_transformations_must_be_in_reverse_order() {
+        let mut point = Tuple::point(1.0, 0.0, 1.0);
+        point = translation(10.0, 5.0, 7.0) * scaling(5.0, 5.0, 5.0) * rotation_x(PI / 2.0) * point;
+        assert!(is_float_equal(point.x, 15.0));
+        assert!(is_float_equal(point.y, 0.0));
+        assert!(is_float_equal(point.z, 7.0));
+    }
+
+    #[test]
     fn shearing_moves_z_in_proportion_to_y() {
         let point = Tuple::point(2.0, 3.0, 4.0);
         let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
