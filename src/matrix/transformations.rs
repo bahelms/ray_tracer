@@ -35,7 +35,7 @@ impl Matrix {
         transform * self.clone()
     }
 
-    fn rotate_z(&self, radians: f64) -> Self {
+    pub fn rotate_z(&self, radians: f64) -> Self {
         let mut transform = Matrix::identity();
         transform[0][0] = radians.cos();
         transform[0][1] = -radians.sin();

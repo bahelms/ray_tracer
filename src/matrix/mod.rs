@@ -7,7 +7,7 @@ use std::ops::{Index, IndexMut, Mul};
 * Implemented with a vector of vectors.
 */
 #[derive(Debug, PartialEq, Clone)]
-struct Matrix {
+pub struct Matrix {
     rows: Vec<Vec<f64>>,
 }
 
@@ -25,7 +25,7 @@ impl Matrix {
     }
 
     // hardcoded for 4x4
-    fn identity() -> Self {
+    pub fn identity() -> Self {
         Self::populate(vec![
             vec![1.0, 0.0, 0.0, 0.0],
             vec![0.0, 1.0, 0.0, 0.0],

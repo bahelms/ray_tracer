@@ -39,7 +39,7 @@ fn virtual_cannon() {
         let pos_y = canvas.height - (pos.y as i32);
         if pos_y <= canvas.height {
             let color = Color::new(1.0, 0.0, 1.0);
-            canvas.write_pixel(pos.x as i32, pos_y, color);
+            canvas.write_pixel(&Tuple::point(pos.x, pos_y as f64, 0.0), color);
         }
     }
 

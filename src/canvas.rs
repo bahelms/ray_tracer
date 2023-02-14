@@ -1,4 +1,4 @@
-use crate::tuple::Color;
+use crate::tuple::{Color, Tuple};
 
 const MAX_PPM_VALUE: i32 = 255;
 const PPM_LINE_SIZE: i32 = 70;
@@ -24,20 +24,20 @@ impl Canvas {
         }
     }
 
-    pub fn write_pixel(&mut self, x: i32, y: i32, pixel: Color) {
-        let idx = self.point_to_index(x, y);
+    pub fn write_pixel(&mut self, point: &Tuple, pixel: Color) {
+        let idx = self.point_to_index(point);
         if idx < self.pixels.len() {
             self.pixels[idx] = pixel;
         }
     }
 
-    fn pixel_at(&self, x: i32, y: i32) -> Option<&Color> {
-        let idx = self.point_to_index(x, y);
+    fn pixel_at(&self, point: &Tuple) -> Option<&Color> {
+        let idx = self.point_to_index(point);
         self.pixels.get(idx)
     }
 
-    fn point_to_index(&self, x: i32, y: i32) -> usize {
-        (y * self.width + x) as usize
+    fn point_to_index(&self, point: &Tuple) -> usize {
+        (point.y as i32 * self.width + point.x as i32) as usize
     }
 
     // Color values are scaled bewteen 0 and 255: 0:0-1:255
@@ -77,7 +77,6 @@ fn scale_value(value: f64, max: i32) -> i32 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tuple::Color;
 
     #[test]
     fn scale_value_clamps_values_bewteen_zero_and_max() {
@@ -94,7 +93,8 @@ mod tests {
         let mut canvas = Canvas::new(10, 2);
         for y in 0..2 {
             for x in 0..10 {
-                canvas.write_pixel(x, y, Color::new(1.0, 0.8, 0.6));
+                let point = Tuple::point(x as f64, y as f64, 0.0);
+                canvas.write_pixel(&point, Color::new(1.0, 0.8, 0.6));
             }
         }
         let ppm = canvas.to_ppm();
@@ -112,9 +112,9 @@ mod tests {
     #[test]
     fn canvas_to_ppm_with_pixels() {
         let mut canvas = Canvas::new(5, 3);
-        canvas.write_pixel(0, 0, Color::new(1.5, 0.0, 0.0));
-        canvas.write_pixel(2, 1, Color::new(0.0, 0.5, 0.0));
-        canvas.write_pixel(4, 2, Color::new(-0.5, 0.0, 1.0));
+        canvas.write_pixel(&Tuple::point(0.0, 0.0, 0.0), Color::new(1.5, 0.0, 0.0));
+        canvas.write_pixel(&Tuple::point(2.0, 1.0, 0.0), Color::new(0.0, 0.5, 0.0));
+        canvas.write_pixel(&Tuple::point(4.0, 2.0, 0.0), Color::new(-0.5, 0.0, 1.0));
         let ppm = canvas.to_ppm();
         let expected_ppm = "P3\n\
             5 3\n\
@@ -136,15 +136,17 @@ mod tests {
     #[test]
     fn writing_a_pixel_out_of_bounds_of_canvas() {
         let mut canvas = Canvas::new(5, 10);
-        canvas.write_pixel(5, 9, Color::new(1.0, 0.0, 0.0));
-        assert_eq!(canvas.pixel_at(1, 10), None);
+        let point = Tuple::point(5.0, 9.0, 0.0);
+        canvas.write_pixel(&point, Color::new(1.0, 0.0, 0.0));
+        assert_eq!(canvas.pixel_at(&Tuple::point(1.0, 10.0, 0.0)), None);
     }
 
     #[test]
     fn writing_and_getting_a_pixel_on_the_canvas() {
         let mut canvas = Canvas::new(5, 10);
-        canvas.write_pixel(2, 3, Color::new(1.0, 0.0, 0.0));
-        assert_eq!(canvas.pixel_at(2, 3).unwrap(), &Color::new(1.0, 0.0, 0.0));
+        let point = Tuple::point(2.0, 3.0, 0.0);
+        canvas.write_pixel(&point, Color::new(1.0, 0.0, 0.0));
+        assert_eq!(canvas.pixel_at(&point).unwrap(), &Color::new(1.0, 0.0, 0.0));
     }
 
     #[test]
