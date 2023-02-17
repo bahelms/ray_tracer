@@ -1,7 +1,7 @@
 use super::Matrix;
 
 impl Matrix {
-    fn translate(&self, x: f64, y: f64, z: f64) -> Self {
+    pub fn translate(&self, x: f64, y: f64, z: f64) -> Self {
         let mut transform = Matrix::identity();
         transform[0][3] = x;
         transform[1][3] = y;
@@ -26,7 +26,7 @@ impl Matrix {
         transform * self.clone()
     }
 
-    fn rotate_y(&self, radians: f64) -> Self {
+    pub fn rotate_y(&self, radians: f64) -> Self {
         let mut transform = Matrix::identity();
         transform[0][0] = radians.cos();
         transform[0][2] = radians.sin();

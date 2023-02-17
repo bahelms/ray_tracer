@@ -4,18 +4,20 @@ use ray_tracer::tuple::{Color, Tuple};
 use std::f64::consts::PI;
 
 fn main() {
-    let mut canvas = Canvas::new(200, 200);
-    let point = Tuple::point(100.0, 10.0, 0.0);
+    let mut canvas = Canvas::new(250, 250);
+    let start_point = Tuple::point(0.0, -100.0, 0.0);
+    let identity = Matrix::identity();
 
-    canvas.write_pixel(&point, Color::white());
+    let twelve = identity.translate(125.0, 125.0, 0.0) * start_point;
+    canvas.write_pixel(&twelve, Color::white());
 
-    let transform = Matrix::identity().rotate_z(PI / 2.0);
-    let new_point = transform * point;
-    canvas.write_pixel(&point, Color::white());
-
-    let transform = Matrix::identity().rotate_z(PI / 1.0);
-    let new_point = transform * point;
-    canvas.write_pixel(&point, Color::white());
+    for hour in 1..12 {
+        let new_point = identity
+            .rotate_z(hour as f64 * PI / 6.0)
+            .translate(125.0, 125.0, 0.0)
+            * start_point;
+        canvas.write_pixel(&new_point, Color::white());
+    }
 
     save_image(canvas);
 }
