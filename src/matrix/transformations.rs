@@ -6,7 +6,7 @@ impl Matrix {
         transform[0][3] = x;
         transform[1][3] = y;
         transform[2][3] = z;
-        transform * self.clone()
+        &transform * self
     }
 
     fn scale(&self, x: f64, y: f64, z: f64) -> Self {
@@ -14,7 +14,7 @@ impl Matrix {
         transform[0][0] = x;
         transform[1][1] = y;
         transform[2][2] = z;
-        transform * self.clone()
+        &transform * self
     }
 
     fn rotate_x(&self, radians: f64) -> Self {
@@ -23,7 +23,7 @@ impl Matrix {
         transform[1][2] = -radians.sin();
         transform[2][1] = radians.sin();
         transform[2][2] = radians.cos();
-        transform * self.clone()
+        &transform * self
     }
 
     pub fn rotate_y(&self, radians: f64) -> Self {
@@ -32,7 +32,7 @@ impl Matrix {
         transform[0][2] = radians.sin();
         transform[2][0] = -radians.sin();
         transform[2][2] = radians.cos();
-        transform * self.clone()
+        &transform * self
     }
 
     pub fn rotate_z(&self, radians: f64) -> Self {
@@ -41,7 +41,7 @@ impl Matrix {
         transform[0][1] = -radians.sin();
         transform[1][0] = radians.sin();
         transform[1][1] = radians.cos();
-        transform * self.clone()
+        &transform * self
     }
 
     fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self {
@@ -52,7 +52,7 @@ impl Matrix {
         transform[1][2] = yz;
         transform[2][0] = zx;
         transform[2][1] = zy;
-        transform * self.clone()
+        &transform * self
     }
 }
 

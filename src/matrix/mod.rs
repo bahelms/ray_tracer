@@ -135,10 +135,12 @@ impl Mul for Matrix {
 
         for row in 0..width {
             for col in 0..width {
-                product[row][col] = self[row][0] * other[0][col]
-                    + self[row][1] * other[1][col]
-                    + self[row][2] * other[2][col]
-                    + self[row][3] * other[3][col];
+                let mut sum = 0.0;
+
+                for idx in 0..self.rows.len() {
+                    sum += self[row][idx] * other[idx][col]
+                }
+                product[row][col] = sum;
             }
         }
         product
@@ -148,17 +150,19 @@ impl Mul for Matrix {
 impl Mul for &Matrix {
     type Output = Matrix;
 
-    // Hardcoded for a 4x4 matrix
+    // Assumes the matrix is square
     fn mul(self, other: &Matrix) -> Self::Output {
         let mut product = self.clone();
         let width = self.rows[0].len();
 
         for row in 0..width {
             for col in 0..width {
-                product[row][col] = self[row][0] * other[0][col]
-                    + self[row][1] * other[1][col]
-                    + self[row][2] * other[2][col]
-                    + self[row][3] * other[3][col];
+                let mut sum = 0.0;
+
+                for idx in 0..self.rows.len() {
+                    sum += self[row][idx] * other[idx][col]
+                }
+                product[row][col] = sum;
             }
         }
         product

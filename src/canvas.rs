@@ -4,7 +4,7 @@ const MAX_PPM_VALUE: i32 = 255;
 const PPM_LINE_SIZE: i32 = 70;
 
 pub struct Canvas {
-    width: i32,
+    pub width: i32,
     pub height: i32,
     pixels: Vec<Color>,
 }
