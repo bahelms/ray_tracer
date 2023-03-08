@@ -17,14 +17,5 @@ fn main() {
         canvas.write_pixel(&new_point, Color::white());
     }
 
-    save_image(canvas);
-}
-
-fn save_image(canvas: Canvas) {
-    use std::fs::File;
-    use std::io::prelude::*;
-
-    println!("Saving image...");
-    let mut file = File::create("images/analog_clock.ppm").unwrap();
-    file.write_all(canvas.to_ppm().as_bytes()).unwrap();
+    ray_tracer::save_image(canvas, "analog_clock.ppm");
 }

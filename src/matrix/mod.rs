@@ -95,7 +95,7 @@ impl Matrix {
         self.determinant() != 0.0
     }
 
-    fn inverse(&self) -> Option<Self> {
+    pub fn inverse(&self) -> Option<Self> {
         if self.is_invertible() {
             let mut inverted_matrix = self.clone();
             for (row_idx, row) in self.rows.iter().enumerate() {
@@ -170,6 +170,33 @@ impl Mul for &Matrix {
 }
 
 impl Mul<Tuple> for Matrix {
+    type Output = Tuple;
+
+    // Hardcoded for a 4x4 matrix
+    fn mul(self, other: Tuple) -> Self::Output {
+        let x = self[0][0] * other.x
+            + self[0][1] * other.y
+            + self[0][2] * other.z
+            + self[0][3] * other.w;
+        let y = self[1][0] * other.x
+            + self[1][1] * other.y
+            + self[1][2] * other.z
+            + self[1][3] * other.w;
+        let z = self[2][0] * other.x
+            + self[2][1] * other.y
+            + self[2][2] * other.z
+            + self[2][3] * other.w;
+        let w = self[3][0] * other.x
+            + self[3][1] * other.y
+            + self[3][2] * other.z
+            + self[3][3] * other.w;
+        let mut point = Tuple::point(x, y, z);
+        point.w = w;
+        point
+    }
+}
+
+impl Mul<Tuple> for &Matrix {
     type Output = Tuple;
 
     // Hardcoded for a 4x4 matrix
@@ -468,6 +495,13 @@ mod tests {
             vec![0.0, 8.0, 3.0, 8.0],
         ]);
         assert_eq!(matrix.transpose(), transposed);
+    }
+
+    #[test]
+    fn multiplying_identity_matrix_reference_with_point_returns_point() {
+        let tuple = Tuple::point(1.0, 2.0, 3.0);
+        let identity = Matrix::identity();
+        assert_eq!(&identity * tuple, tuple);
     }
 
     #[test]

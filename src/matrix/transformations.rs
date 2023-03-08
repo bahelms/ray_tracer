@@ -9,7 +9,7 @@ impl Matrix {
         &transform * self
     }
 
-    fn scale(&self, x: f64, y: f64, z: f64) -> Self {
+    pub fn scale(&self, x: f64, y: f64, z: f64) -> Self {
         let mut transform = Matrix::identity();
         transform[0][0] = x;
         transform[1][1] = y;
@@ -44,7 +44,7 @@ impl Matrix {
         &transform * self
     }
 
-    fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self {
+    pub fn shear(&self, xy: f64, xz: f64, yx: f64, yz: f64, zx: f64, zy: f64) -> Self {
         let mut transform = Matrix::identity();
         transform[0][1] = xy;
         transform[0][2] = xz;

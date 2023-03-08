@@ -43,7 +43,7 @@ impl Tuple {
     /// Multiply this vector with another one to reduce it to one scalar number.
     /// This applies the directional growth of one vector to another.
     /// The smaller the value, the larger the angle between the vectors.
-    fn dot(&self, other: &Self) -> f64 {
+    pub fn dot(&self, other: &Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
     }
 
@@ -78,6 +78,10 @@ impl Color {
 
     pub fn white() -> Self {
         Self::new(1.0, 1.0, 1.0)
+    }
+
+    pub fn red() -> Self {
+        Self::new(1.0, 0.0, 0.0)
     }
 
     pub fn iter(&self) -> ColorIter {

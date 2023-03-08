@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 criterion = "0.4"
+rand = "0.8.5"
 
 [[bench]]
 name = "ppm_benchmark"
