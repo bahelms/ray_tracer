@@ -35,7 +35,7 @@ impl Matrix {
     }
 
     // changes the rows into columns
-    fn transpose(&self) -> Self {
+    pub fn transpose(&self) -> Self {
         let mut transposed = self.clone();
         for (col, row) in self.rows.iter().enumerate() {
             for (idx, value) in row.iter().enumerate() {

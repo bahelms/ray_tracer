@@ -53,6 +53,10 @@ impl Ray {
     }
 }
 
+trait Object {
+    fn normal_at(&self, point: &Tuple) -> Option<Tuple>;
+}
+
 #[derive(Debug, PartialEq)]
 pub struct Sphere {
     id: f64,
@@ -69,6 +73,22 @@ impl Sphere {
         Self {
             id: rng.gen(),
             transform,
+        }
+    }
+}
+
+impl Object for Sphere {
+    fn normal_at(&self, world_point: &Tuple) -> Option<Tuple> {
+        match self.transform.inverse() {
+            Some(inverse) => {
+                let center = Tuple::point(0.0, 0.0, 0.0); // Hardcoded unit sphere
+                let object_point = &inverse * *world_point;
+                let object_normal = object_point - center;
+                let mut world_normal = inverse.transpose() * object_normal;
+                world_normal.w = 0.0; // hack - see page 82
+                Some(world_normal.normalize())
+            }
+            _ => None,
         }
     }
 }
@@ -108,7 +128,70 @@ pub fn hit<'a>(intersections: &'a Vec<Intersection>) -> Option<&'a Intersection<
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::is_float_equal;
     use crate::matrix::Matrix;
+    use core::f64::consts::{FRAC_1_SQRT_2, PI};
+
+    #[test]
+    fn calculate_normal_on_transformed_sphere() {
+        let sphere =
+            Sphere::with_transform(Matrix::identity().rotate_z(PI / 5.0).scale(1.0, 0.5, 1.0));
+        let value = 2.0_f64.sqrt() / 2.0;
+        let normal = sphere.normal_at(&Tuple::point(0.0, value, -value)).unwrap();
+        assert!(is_float_equal(normal.y, 0.97014));
+        assert!(is_float_equal(normal.z, -0.24254));
+    }
+
+    #[test]
+    fn calculate_normal_on_translated_sphere() {
+        let sphere = Sphere::with_transform(Matrix::identity().translate(0.0, 1.0, 0.0));
+        let normal = sphere
+            .normal_at(&Tuple::point(0.0, 1.70711, -FRAC_1_SQRT_2))
+            .unwrap();
+        assert!(is_float_equal(normal.y, FRAC_1_SQRT_2));
+        assert!(is_float_equal(normal.z, -FRAC_1_SQRT_2));
+    }
+
+    #[test]
+    fn normals_are_always_normalized() {
+        let sphere = Sphere::new();
+        let value = 3.0_f64.sqrt() / 3.0;
+        let normal = sphere
+            .normal_at(&Tuple::point(value, value, value))
+            .unwrap();
+        assert_eq!(normal, normal.normalize());
+    }
+
+    #[test]
+    fn normal_of_a_sphere_on_nonaxial_point() {
+        let sphere = Sphere::new();
+        let value = 3.0_f64.sqrt() / 3.0;
+        let normal = sphere
+            .normal_at(&Tuple::point(value, value, value))
+            .unwrap();
+        assert_eq!(normal, Tuple::vector(value, value, value));
+    }
+
+    #[test]
+    fn normal_of_a_sphere_on_z_axis() {
+        let sphere = Sphere::new();
+        let normal = sphere.normal_at(&Tuple::point(0.0, 0.0, 1.0)).unwrap();
+        assert_eq!(normal, Tuple::vector(0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn normal_of_a_sphere_on_y_axis() {
+        let sphere = Sphere::new();
+        let normal = sphere.normal_at(&Tuple::point(0.0, 1.0, 0.0)).unwrap();
+        assert_eq!(normal, Tuple::vector(0.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn normal_of_a_sphere_on_x_axis() {
+        let sphere = Sphere::new();
+        let normal = sphere.normal_at(&Tuple::point(1.0, 0.0, 0.0)).unwrap();
+        assert_eq!(normal, Tuple::vector(1.0, 0.0, 0.0));
+    }
 
     #[test]
     fn intersecting_translated_sphere_with_ray() {
