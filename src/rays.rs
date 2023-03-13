@@ -1,5 +1,5 @@
 use crate::matrix::Matrix;
-use crate::tuple::Tuple;
+use crate::tuple::{Color, Tuple};
 use rand::prelude::*;
 
 pub struct Ray {
@@ -61,6 +61,7 @@ trait Object {
 pub struct Sphere {
     id: f64,
     transform: Matrix,
+    material: Material,
 }
 
 impl Sphere {
@@ -72,6 +73,7 @@ impl Sphere {
         let mut rng = rand::thread_rng();
         Self {
             id: rng.gen(),
+            material: Material::new(),
             transform,
         }
     }
@@ -89,6 +91,27 @@ impl Object for Sphere {
                 Some(world_normal.normalize())
             }
             _ => None,
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+struct Material {
+    color: Color,
+    ambient: f64,
+    diffuse: f64,
+    specular: f64,
+    shininess: f64,
+}
+
+impl Material {
+    fn new() -> Self {
+        Self {
+            color: Color::black(),
+            ambient: 0.1,
+            diffuse: 0.9,
+            specular: 0.9,
+            shininess: 200.0,
         }
     }
 }
@@ -125,12 +148,153 @@ pub fn hit<'a>(intersections: &'a Vec<Intersection>) -> Option<&'a Intersection<
     hit
 }
 
+pub struct PointLight {
+    position: Tuple,
+    intensity: Color,
+}
+
+impl PointLight {
+    fn new(position: Tuple, intensity: Color) -> Self {
+        Self {
+            position,
+            intensity,
+        }
+    }
+}
+
+fn lighting(
+    material: Material,
+    light: PointLight,
+    position: Tuple,
+    eye: Tuple,
+    normal: Tuple,
+) -> Color {
+    // combine surface color with the light's color/intensity
+    let effective_color = &material.color + &light.intensity;
+    let light_direction = (light.position - position).normalize();
+    let ambient = &effective_color * material.ambient;
+    let mut diffuse = Color::black();
+    let mut specular = Color::black();
+
+    // This is the cosine of the angle between the light vector and normal.
+    // A negative value means the light is on the other side of the surface.
+    let light_dot_normal = light_direction.dot(&normal);
+    if light_dot_normal > 0.0 {
+        diffuse = &(&effective_color * material.diffuse) * light_dot_normal;
+
+        // This is the cosine of the angle between the eye and reflection.
+        // A negative value means the light reflects away from the eye.
+        let reflection_direction = -light_direction.reflect(&normal);
+        let reflect_dot_eye = reflection_direction.dot(&eye);
+
+        if reflect_dot_eye <= 0.0 {
+            specular = Color::black();
+        } else {
+            let factor = reflect_dot_eye.powf(material.shininess);
+            specular = &(&light.intensity * material.specular) * factor;
+        }
+    }
+    ambient + diffuse + specular
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::is_float_equal;
     use crate::matrix::Matrix;
     use core::f64::consts::{FRAC_1_SQRT_2, PI};
+
+    #[test]
+    fn lighting_with_light_behind_surface() {
+        let material = Material::new();
+        let position = Tuple::point(0.0, 0.0, 0.0);
+        let eye = Tuple::vector(0.0, 0.0, -1.0);
+        let normal = Tuple::vector(0.0, 0.0, -1.0);
+        let light = PointLight::new(Tuple::point(0.0, 0.0, 10.0), Color::white());
+        let color = lighting(material, light, position, eye, normal);
+        assert_eq!(color, Color::new(0.1, 0.1, 0.1));
+    }
+
+    #[test]
+    fn lighting_with_eye_in_path_of_reflection_vector() {
+        let material = Material::new();
+        let position = Tuple::point(0.0, 0.0, 0.0);
+        let eye = Tuple::vector(0.0, 2.0_f64.sqrt() / -2.0, 2.0_f64.sqrt() / -2.0);
+        let normal = Tuple::vector(0.0, 0.0, -1.0);
+        let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::white());
+        let color = lighting(material, light, position, eye, normal);
+        assert!(is_float_equal(color.red, 1.6364));
+        assert!(is_float_equal(color.green, 1.6364));
+        assert!(is_float_equal(color.blue, 1.6364));
+    }
+
+    #[test]
+    fn lighting_with_eye_opposite_surface_light_offset_45_degrees() {
+        let material = Material::new();
+        let position = Tuple::point(0.0, 0.0, 0.0);
+        let eye = Tuple::vector(0.0, 0.0, -1.0);
+        let normal = Tuple::vector(0.0, 0.0, -1.0);
+        let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::white());
+        let color = lighting(material, light, position, eye, normal);
+        assert!(is_float_equal(color.red, 0.7364));
+        assert!(is_float_equal(color.green, 0.7364));
+        assert!(is_float_equal(color.blue, 0.7364));
+    }
+
+    #[test]
+    fn lighting_with_eye_offset_45_degrees_between_light_and_surface() {
+        let material = Material::new();
+        let position = Tuple::point(0.0, 0.0, 0.0);
+        let eye = Tuple::vector(0.0, 2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / -2.0);
+        let normal = Tuple::vector(0.0, 0.0, -1.0);
+        let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::white());
+        let color = lighting(material, light, position, eye, normal);
+        assert_eq!(color, Color::new(1.0, 1.0, 1.0));
+    }
+
+    #[test]
+    fn lighting_with_the_eye_between_the_light_and_surface() {
+        let material = Material::new();
+        let position = Tuple::point(0.0, 0.0, 0.0);
+        let eye = Tuple::vector(0.0, 0.0, -1.0);
+        let normal = Tuple::vector(0.0, 0.0, -1.0);
+        let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::white());
+        let color = lighting(material, light, position, eye, normal);
+        assert_eq!(color, Color::new(1.9, 1.9, 1.9));
+    }
+
+    #[test]
+    fn sphere_can_have_material_assigned() {
+        let mut sphere = Sphere::new();
+        let mut material = Material::new();
+        material.ambient = 1.99;
+        sphere.material = material;
+        assert_eq!(sphere.material.ambient, 1.99);
+    }
+
+    #[test]
+    fn sphere_has_a_default_material() {
+        assert_eq!(Sphere::new().material, Material::new());
+    }
+
+    #[test]
+    fn material_default_values() {
+        let material = Material::new();
+        assert_eq!(material.color, Color::black());
+        assert_eq!(material.ambient, 0.1);
+        assert_eq!(material.diffuse, 0.9);
+        assert_eq!(material.specular, 0.9);
+        assert_eq!(material.shininess, 200.0);
+    }
+
+    #[test]
+    fn point_light_has_position_and_intensity() {
+        let intensity = Color::black();
+        let position = Tuple::point(0.0, 0.0, 0.0);
+        let light = PointLight::new(position, intensity);
+        assert_eq!(light.position, Tuple::point(0.0, 0.0, 0.0));
+        assert_eq!(light.intensity, Color::black());
+    }
 
     #[test]
     fn calculate_normal_on_transformed_sphere() {

@@ -58,6 +58,11 @@ impl Tuple {
             self.x * other.y - self.y * other.x,
         )
     }
+
+    /// Reflect an incoming vector around the normal of the surface.
+    pub fn reflect(&self, normal: &Tuple) -> Tuple {
+        *self - *normal * 2.0 * self.dot(normal)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -131,43 +136,6 @@ impl Add for Tuple {
     }
 }
 
-impl Add for Color {
-    type Output = Self;
-
-    fn add(self, other: Self) -> Self {
-        Self {
-            red: self.red + other.red,
-            green: self.green + other.green,
-            blue: self.blue + other.blue,
-        }
-    }
-}
-
-impl Sub for Tuple {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self::Output {
-        Self::Output {
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-            w: self.w - other.w,
-        }
-    }
-}
-
-impl Sub for Color {
-    type Output = Self;
-
-    fn sub(self, other: Self) -> Self {
-        Self {
-            red: self.red - other.red,
-            green: self.green - other.green,
-            blue: self.blue - other.blue,
-        }
-    }
-}
-
 impl Neg for Tuple {
     type Output = Self;
 
@@ -194,26 +162,15 @@ impl Mul<f64> for Tuple {
     }
 }
 
-impl Mul<i32> for Color {
+impl Sub for Tuple {
     type Output = Self;
 
-    fn mul(self, scalar: i32) -> Self::Output {
-        Self {
-            red: self.red * scalar as f64,
-            green: self.green * scalar as f64,
-            blue: self.blue * scalar as f64,
-        }
-    }
-}
-
-impl Mul for Color {
-    type Output = Self;
-
-    fn mul(self, other: Color) -> Self {
-        Self {
-            red: self.red * other.red,
-            green: self.green * other.green,
-            blue: self.blue * other.blue,
+    fn sub(self, other: Self) -> Self::Output {
+        Self::Output {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+            w: self.w - other.w,
         }
     }
 }
@@ -231,9 +188,90 @@ impl Div<f64> for Tuple {
     }
 }
 
+impl Add for Color {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            red: self.red + other.red,
+            green: self.green + other.green,
+            blue: self.blue + other.blue,
+        }
+    }
+}
+
+impl Add for &Color {
+    type Output = Color;
+
+    fn add(self, other: Self) -> Self::Output {
+        Color {
+            red: self.red + other.red,
+            green: self.green + other.green,
+            blue: self.blue + other.blue,
+        }
+    }
+}
+
+impl Sub for Color {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            red: self.red - other.red,
+            green: self.green - other.green,
+            blue: self.blue - other.blue,
+        }
+    }
+}
+
+impl Mul<f64> for &Color {
+    type Output = Color;
+
+    fn mul(self, scalar: f64) -> Self::Output {
+        Self::Output {
+            red: self.red * scalar,
+            green: self.green * scalar,
+            blue: self.blue * scalar,
+        }
+    }
+}
+
+impl Mul for Color {
+    type Output = Self;
+
+    fn mul(self, other: Color) -> Self {
+        Self {
+            red: self.red * other.red,
+            green: self.green * other.green,
+            blue: self.blue * other.blue,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn reflecting_a_vector_at_45_degrees() {
+        let vector = Tuple::vector(1.0, -1.0, 0.0);
+        let normal = Tuple::vector(0.0, 1.0, 0.0);
+        let reflected = vector.reflect(&normal);
+        assert!(is_float_equal(reflected.x, 1.0));
+        assert!(is_float_equal(reflected.y, 1.0));
+        assert!(is_float_equal(reflected.z, 0.0));
+    }
+
+    #[test]
+    fn reflecting_a_vector_off_slanted_surface() {
+        let slant = 2.0_f64.sqrt() / 2.0;
+        let vector = Tuple::vector(0.0, -1.0, 0.0);
+        let normal = Tuple::vector(slant, slant, 0.0);
+        let reflected = vector.reflect(&normal);
+        assert!(is_float_equal(reflected.x, 1.0));
+        assert!(is_float_equal(reflected.y, 0.0));
+        assert!(is_float_equal(reflected.z, 0.0));
+    }
 
     #[test]
     fn color_is_iterable() {
@@ -267,7 +305,7 @@ mod tests {
     #[test]
     fn multiplying_colors_by_scalar() {
         let c1 = Color::new(0.2, 0.3, 0.4);
-        assert!(Color::new(0.4, 0.6, 0.8).is_equal(&(c1 * 2)));
+        assert!(Color::new(0.4, 0.6, 0.8).is_equal(&(&c1 * 2.0)));
     }
 
     #[test]
