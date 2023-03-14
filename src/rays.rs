@@ -4,7 +4,7 @@ use rand::prelude::*;
 
 pub struct Ray {
     origin: Tuple,
-    direction: Tuple,
+    pub direction: Tuple,
 }
 
 impl Ray {
@@ -53,7 +53,7 @@ impl Ray {
     }
 }
 
-trait Object {
+pub trait Object {
     fn normal_at(&self, point: &Tuple) -> Option<Tuple>;
 }
 
@@ -61,7 +61,7 @@ trait Object {
 pub struct Sphere {
     id: f64,
     transform: Matrix,
-    material: Material,
+    pub material: Material,
 }
 
 impl Sphere {
@@ -96,7 +96,7 @@ impl Object for Sphere {
 }
 
 #[derive(Debug, PartialEq)]
-struct Material {
+pub struct Material {
     color: Color,
     ambient: f64,
     diffuse: f64,
@@ -105,21 +105,32 @@ struct Material {
 }
 
 impl Material {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            color: Color::black(),
+            color: Color::white(),
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
         }
     }
+
+    pub fn color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+}
+
+impl Default for Material {
+    fn default() -> Self {
+        Material::new()
+    }
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Intersection<'a> {
-    time: f64,
-    object: &'a Sphere,
+    pub time: f64,
+    pub object: &'a Sphere,
 }
 
 impl<'a> Intersection<'a> {
@@ -154,7 +165,7 @@ pub struct PointLight {
 }
 
 impl PointLight {
-    fn new(position: Tuple, intensity: Color) -> Self {
+    pub fn new(position: Tuple, intensity: Color) -> Self {
         Self {
             position,
             intensity,
@@ -162,15 +173,15 @@ impl PointLight {
     }
 }
 
-fn lighting(
-    material: Material,
-    light: PointLight,
+pub fn lighting(
+    material: &Material,
+    light: &PointLight,
     position: Tuple,
     eye: Tuple,
     normal: Tuple,
 ) -> Color {
     // combine surface color with the light's color/intensity
-    let effective_color = &material.color + &light.intensity;
+    let effective_color = &material.color * &light.intensity;
     let light_direction = (light.position - position).normalize();
     let ambient = &effective_color * material.ambient;
     let mut diffuse = Color::black();
@@ -211,7 +222,7 @@ mod tests {
         let eye = Tuple::vector(0.0, 0.0, -1.0);
         let normal = Tuple::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 0.0, 10.0), Color::white());
-        let color = lighting(material, light, position, eye, normal);
+        let color = lighting(&material, &light, position, eye, normal);
         assert_eq!(color, Color::new(0.1, 0.1, 0.1));
     }
 
@@ -222,7 +233,7 @@ mod tests {
         let eye = Tuple::vector(0.0, 2.0_f64.sqrt() / -2.0, 2.0_f64.sqrt() / -2.0);
         let normal = Tuple::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::white());
-        let color = lighting(material, light, position, eye, normal);
+        let color = lighting(&material, &light, position, eye, normal);
         assert!(is_float_equal(color.red, 1.6364));
         assert!(is_float_equal(color.green, 1.6364));
         assert!(is_float_equal(color.blue, 1.6364));
@@ -235,7 +246,7 @@ mod tests {
         let eye = Tuple::vector(0.0, 0.0, -1.0);
         let normal = Tuple::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 10.0, -10.0), Color::white());
-        let color = lighting(material, light, position, eye, normal);
+        let color = lighting(&material, &light, position, eye, normal);
         assert!(is_float_equal(color.red, 0.7364));
         assert!(is_float_equal(color.green, 0.7364));
         assert!(is_float_equal(color.blue, 0.7364));
@@ -248,7 +259,7 @@ mod tests {
         let eye = Tuple::vector(0.0, 2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / -2.0);
         let normal = Tuple::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::white());
-        let color = lighting(material, light, position, eye, normal);
+        let color = lighting(&material, &light, position, eye, normal);
         assert_eq!(color, Color::new(1.0, 1.0, 1.0));
     }
 
@@ -259,7 +270,7 @@ mod tests {
         let eye = Tuple::vector(0.0, 0.0, -1.0);
         let normal = Tuple::vector(0.0, 0.0, -1.0);
         let light = PointLight::new(Tuple::point(0.0, 0.0, -10.0), Color::white());
-        let color = lighting(material, light, position, eye, normal);
+        let color = lighting(&material, &light, position, eye, normal);
         assert_eq!(color, Color::new(1.9, 1.9, 1.9));
     }
 
@@ -280,7 +291,7 @@ mod tests {
     #[test]
     fn material_default_values() {
         let material = Material::new();
-        assert_eq!(material.color, Color::black());
+        assert_eq!(material.color, Color::white());
         assert_eq!(material.ambient, 0.1);
         assert_eq!(material.diffuse, 0.9);
         assert_eq!(material.specular, 0.9);

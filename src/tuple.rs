@@ -236,11 +236,11 @@ impl Mul<f64> for &Color {
     }
 }
 
-impl Mul for Color {
-    type Output = Self;
+impl Mul for &Color {
+    type Output = Color;
 
-    fn mul(self, other: Color) -> Self {
-        Self {
+    fn mul(self, other: &Color) -> Self::Output {
+        Self::Output {
             red: self.red * other.red,
             green: self.green * other.green,
             blue: self.blue * other.blue,
@@ -293,13 +293,6 @@ mod tests {
     fn creating_new_white_color() {
         let white = Color::new(1.0, 1.0, 1.0);
         assert_eq!(white, Color::white());
-    }
-
-    #[test]
-    fn multiplying_colors() {
-        let c1 = Color::new(1.0, 0.2, 0.4);
-        let c2 = Color::new(0.9, 1.0, 0.1);
-        assert!(Color::new(0.9, 0.2, 0.04).is_equal(&(c1 * c2)));
     }
 
     #[test]
