@@ -19,7 +19,7 @@ impl Ray {
     pub fn intersect<'a>(&'a self, sphere: &'a Sphere) -> Option<Vec<Intersection>> {
         // Hardcoded unit sphere
         let sphere_center = Tuple::point(0.0, 0.0, 0.0);
-        // Transform the ray instead of the sphere - let's the sphere stay at unit
+        // Transform the ray instead of the sphere - let the sphere stay at unit
         let transform_inverse = match sphere.transform.inverse() {
             Some(transform_inverse) => transform_inverse,
             None => return None,
@@ -35,14 +35,14 @@ impl Ray {
         let discriminant = b * b - 4.0 * a * c;
 
         if discriminant < 0.0 {
-            None
-        } else {
-            let sqrt = discriminant.sqrt();
-            Some(vec![
-                Intersection::new((-b - sqrt) / (2.0 * a), sphere),
-                Intersection::new((-b + sqrt) / (2.0 * a), sphere),
-            ])
+            return None;
         }
+
+        let sqrt = discriminant.sqrt();
+        Some(vec![
+            Intersection::new((-b - sqrt) / (2.0 * a), sphere),
+            Intersection::new((-b + sqrt) / (2.0 * a), sphere),
+        ])
     }
 
     fn transform(&self, transformation: Matrix) -> Self {
