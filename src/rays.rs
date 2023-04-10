@@ -1,6 +1,5 @@
 use crate::matrix::Matrix;
 use crate::tuple::{Color, Tuple};
-use rand::prelude::*;
 
 pub struct Ray {
     origin: Tuple,
@@ -26,7 +25,6 @@ impl Ray {
         };
         let new_ray = self.transform(transform_inverse);
 
-        // magic
         // https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
         let center_to_origin = new_ray.origin - sphere_center;
         let a = new_ray.direction.dot(&new_ray.direction);
@@ -70,9 +68,9 @@ impl Sphere {
     }
 
     pub fn with_transform(transform: Matrix) -> Self {
-        let mut rng = rand::thread_rng();
+        use rand::Rng;
         Self {
-            id: rng.gen(),
+            id: rand::thread_rng().gen(),
             material: Material::new(),
             transform,
         }
